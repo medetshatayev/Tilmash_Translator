@@ -1,0 +1,13 @@
+streamlit
+transformers
+langdetect
+sentencepiece
+pysbd
+
+# NLTK for readability and tokenization
+nltk
+pyphen
+
+# For reading docs
+python-docx
+PyPDF2
