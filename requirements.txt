@@ -3,6 +3,7 @@ transformers
 langdetect
 sentencepiece
 pysbd
+torch
 
 # NLTK for readability and tokenization
 nltk
