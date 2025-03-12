@@ -3,6 +3,9 @@ transformers
 langdetect
 sentencepiece
 pysbd
+torch
+huggingface_hub
+python-dotenv
 
 # NLTK for readability and tokenization
 nltk

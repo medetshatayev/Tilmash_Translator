@@ -3,10 +3,18 @@
 import logging
 import re
 import os
+from dotenv import load_dotenv
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, TranslationPipeline
 from .chunking import chunk_text_with_separators
+from huggingface_hub import login
 
+# Load environment variables from .env file
+load_dotenv()
 hf_token = os.getenv('HF_TOKEN')
+if not hf_token:
+    logging.warning("HF_TOKEN not found in environment variables. Model downloading might fail.")
+else:
+    login(token=hf_token)
 
 
 def tilmash_translate(input_text, src_lang, tgt_lang, model=None, tokenizer=None, max_length=512):
@@ -52,14 +60,12 @@ def tilmash_translate(input_text, src_lang, tgt_lang, model=None, tokenizer=None
                 tokenizer = AutoTokenizer.from_pretrained(
                     model_name,
                     cache_dir=cache_dir,
-                    local_files_only=False,
-                    use_auth_token=hf_token
+                    local_files_only=False
                 )
                 model = AutoModelForSeq2SeqLM.from_pretrained(
                     model_name,
                     cache_dir=cache_dir,
-                    local_files_only=False,
-                    use_auth_token=hf_token
+                    local_files_only=False
                 )
                 logging.info("Successfully downloaded and loaded the model.")
         except ValueError as e:

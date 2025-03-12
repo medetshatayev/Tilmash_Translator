@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Tilmash_Translator.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Tilmash_Translator.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/tilmash_translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/tilmash_translation.py" afterDir="false" />
+    <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="Updated retrival of env variables">
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,6 +78,11 @@
       <workItem from="1741774099665" duration="215000" />
       <workItem from="1741775811075" duration="221000" />
       <workItem from="1741776060456" duration="228000" />
+      <workItem from="1741779314728" duration="54000" />
+      <workItem from="1741779620266" duration="139000" />
+      <workItem from="1741781922362" duration="49000" />
+      <workItem from="1741810637677" duration="584000" />
+      <workItem from="1741812691451" duration="286000" />
     </task>
     <task id="LOCAL-00001" summary="Added download option of model from HF">
       <option name="closed" value="true" />
@@ -91,7 +92,23 @@
       <option name="project" value="LOCAL" />
       <updated>1741775858865</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Added download option of model from HF">
+      <option name="closed" value="true" />
+      <created>1741779337480</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1741779337480</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Updated retrival of env variables">
+      <option name="closed" value="true" />
+      <created>1741812765972</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1741812765972</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -110,6 +127,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added download option of model from HF" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added download option of model from HF" />
+    <MESSAGE value="Updated retrival of env variables" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated retrival of env variables" />
   </component>
 </project>
