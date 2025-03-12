@@ -2,8 +2,11 @@
 
 import logging
 import re
+import os
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, TranslationPipeline
 from .chunking import chunk_text_with_separators
+
+hf_token = os.getenv('HF_TOKEN')
 
 
 def tilmash_translate(input_text, src_lang, tgt_lang, model=None, tokenizer=None, max_length=512):
@@ -23,21 +26,42 @@ def tilmash_translate(input_text, src_lang, tgt_lang, model=None, tokenizer=None
     # Initialize model and tokenizer with error handling
     if model is None or tokenizer is None:
         model_name = "issai/tilmash"
+        cache_dir = "local_llms"
+        
+        # Ensure cache directory exists
+        os.makedirs(cache_dir, exist_ok=True)
+        
         try:
-            logging.info("Initializing Tilmash model...")
-            tokenizer = AutoTokenizer.from_pretrained(
-                model_name,
-                cache_dir="local_llms",
-                local_files_only=True
-            )
-            model = AutoModelForSeq2SeqLM.from_pretrained(
-                model_name,
-                cache_dir="local_llms",
-                local_files_only=True
-            )
-        except OSError as e:
-            logging.error(f"Model files not found: {str(e)}")
-            return ""
+            # First try to load the model locally
+            logging.info("Trying to load Tilmash model from local cache...")
+            try:
+                tokenizer = AutoTokenizer.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    local_files_only=True
+                )
+                model = AutoModelForSeq2SeqLM.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    local_files_only=True
+                )
+                logging.info("Successfully loaded model from local cache.")
+            except OSError:
+                # If local loading fails, download the model
+                logging.info("Model not found locally. Downloading from Hugging Face...")
+                tokenizer = AutoTokenizer.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    local_files_only=False,
+                    use_auth_token=hf_token
+                )
+                model = AutoModelForSeq2SeqLM.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    local_files_only=False,
+                    use_auth_token=hf_token
+                )
+                logging.info("Successfully downloaded and loaded the model.")
         except ValueError as e:
             logging.error(f"Invalid model configuration: {str(e)}")
             return ""

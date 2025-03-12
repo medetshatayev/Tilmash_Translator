@@ -4,12 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="" />
+    <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Tilmash_Translator.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Tilmash_Translator.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/tilmash_translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/tilmash_translation.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;medetshatayev&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/medetshatayev/Tilmash_Translator&quot;,
+    &quot;accountId&quot;: &quot;a23ac9ab-cda0-40dc-8852-25ddef41dcce&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -21,6 +42,9 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/mshatayev/PycharmProjects/Tilmash_Translator&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -50,10 +74,42 @@
       <workItem from="1741687355513" duration="1026000" />
       <workItem from="1741691006281" duration="220000" />
       <workItem from="1741691377579" duration="491000" />
+      <workItem from="1741759383793" duration="495000" />
+      <workItem from="1741760136733" duration="117000" />
+      <workItem from="1741762189336" duration="334000" />
+      <workItem from="1741764783794" duration="3527000" />
+      <workItem from="1741773540128" duration="502000" />
+      <workItem from="1741774099665" duration="215000" />
+      <workItem from="1741775811075" duration="221000" />
+      <workItem from="1741776060456" duration="228000" />
     </task>
+    <task id="LOCAL-00001" summary="Added download option of model from HF">
+      <option name="closed" value="true" />
+      <created>1741775858865</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1741775858865</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added download option of model from HF" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added download option of model from HF" />
   </component>
 </project>
