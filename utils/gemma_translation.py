@@ -2,12 +2,42 @@
 
 import os
 import logging
-from pathlib import Path
 from dotenv import load_dotenv
 from llama_cpp import Llama
 import streamlit as st
 from typing import Iterator, Optional, List
 import re
+import time
+import psutil
+import uuid
+import shutil
+import sys
+import contextlib
+
+# Import configuration defaults
+from config import DEFAULT_CONFIG
+
+
+@contextlib.contextmanager
+def suppress_stdout_stderr():
+    """Context manager to suppress stdout and stderr."""
+    # Save original stdout/stderr
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    
+    # Create a null device to redirect output
+    null_device = open(os.devnull, 'w')
+    
+    try:
+        # Redirect stdout/stderr to null device
+        sys.stdout = null_device
+        sys.stderr = null_device
+        yield
+    finally:
+        # Restore original stdout/stderr
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
+        null_device.close()
 
 from .chunking import chunk_text_with_separators
 
@@ -18,12 +48,38 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Model configuration
-MODEL_PATH = os.path.join("local_llms", "gemma-3-12b-it-Q4_K_M.gguf")
-DEFAULT_CONTEXT_SIZE = 8192
-DEFAULT_GPU_LAYERS = 48  # Adjust based on available GPU memory
-DEFAULT_MAX_TOKENS = 4096
-DEFAULT_CHUNK_SIZE = 3000  # Maximum number of tokens per chunk for safety
+# Model configuration from config
+ORIGINAL_MODEL_PATH = os.path.join("local_llms", "gemma-3-12b-it-Q4_K_M.gguf")
+MODEL_DIR = os.path.join("local_llms", "instances")
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+# Read configuration from config
+DEFAULT_CONTEXT_SIZE = DEFAULT_CONFIG["GEMMA_CONTEXT_SIZE"]
+DEFAULT_MAX_TOKENS = DEFAULT_CONFIG["MAX_TOKENS"]
+DEFAULT_CHUNK_SIZE = DEFAULT_CONFIG["CHUNK_SIZE"]  # Max tokens per chunk
+MODEL_INSTANCE_TIMEOUT = DEFAULT_CONFIG["MODEL_INSTANCE_TIMEOUT"]  # 30 minutes
+
+# Garbage collection for session-specific model files
+def cleanup_model_instances():
+    """Remove model instances that haven't been used in the last hour"""
+    try:
+        current_time = time.time()
+        for filename in os.listdir(MODEL_DIR):
+            file_path = os.path.join(MODEL_DIR, filename)
+            # Check if file is a model file and older than 1 hour
+            if filename.endswith(".gguf") and os.path.isfile(file_path):
+                last_access = os.path.getatime(file_path)
+                if current_time - last_access > 3600:  # 3600 seconds = 1 hour
+                    try:
+                        os.remove(file_path)
+                        logger.info(f"Removed unused model instance: {filename}")
+                    except Exception as e:
+                        logger.error(f"Could not remove model file {filename}: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error in cleanup: {str(e)}")
+
+# Run cleanup every time module is imported
+cleanup_model_instances()
 
 class LlamaCppTokenizerAdapter:
     """
@@ -54,27 +110,45 @@ class LlamaCppTokenizerAdapter:
 class GemmaTranslator:
     """
     Translator using Gemma 3 model in GGUF format with streaming capability.
+    Uses a session-specific model file for complete isolation.
     """
     
-    _instance = None
-    _model = None
-    
-    def __new__(cls):
-        """Singleton pattern to ensure only one model is loaded."""
-        if cls._instance is None:
-            cls._instance = super(GemmaTranslator, cls).__new__(cls)
-        return cls._instance
-    
     def __init__(self):
-        """Initialize the Gemma translator if not already initialized."""
-        if not hasattr(self, 'initialized'):
-            self.initialized = False
-            self.model_path = Path(MODEL_PATH)
-            self.model = None
-            self.tokenizer = None
+        """Initialize the Gemma translator for the current session."""
+        self.initialized = False
+        self.model = None
+        self.tokenizer = None
+        self.using_gpu = False
+        self.session_id = getattr(st.session_state, 'session_id', str(uuid.uuid4()))
+        
+        # Create a session-specific model path
+        self.model_path = self._get_session_model_path()
+    
+    def _get_session_model_path(self):
+        """Get or create a session-specific model file."""
+        
+        session_model_filename = f"gemma-{self.session_id}.gguf"
+        session_model_path = os.path.join(MODEL_DIR, session_model_filename)
+        
+        # If the model file doesn't exist yet, create it by copying the original
+        if not os.path.exists(session_model_path):
+            if not os.path.exists(ORIGINAL_MODEL_PATH):
+                raise FileNotFoundError(f"Original model file not found: {ORIGINAL_MODEL_PATH}")
+                
+            logger.info(f"Creating session-specific model file for {self.session_id}")
+            try:
+                shutil.copy2(ORIGINAL_MODEL_PATH, session_model_path)
+                logger.info(f"Created session model at {session_model_path}")
+            except Exception as e:
+                logger.error(f"Failed to create session model: {str(e)}")
+                # Fallback to original model if copy fails
+                return ORIGINAL_MODEL_PATH
+                
+        return session_model_path
+    
     
     def load_model(self, 
-                  n_gpu_layers: int = DEFAULT_GPU_LAYERS, 
+                  n_gpu_layers: int = DEFAULT_CONFIG["GEMMA_GPU_LAYERS"],
                   context_size: int = DEFAULT_CONTEXT_SIZE) -> None:
         """
         Load the Gemma model with specified parameters.
@@ -83,32 +157,100 @@ class GemmaTranslator:
             n_gpu_layers: Number of layers to offload to GPU
             context_size: Context window size
         """
+        # Parameters already have defaults from config
+        # No need for additional checks
+            
         if self.initialized:
-            return
-        
-        if not self.model_path.exists():
+            if n_gpu_layers > 0 and not self.using_gpu:
+                # Need to reload in GPU mode
+                logger.info("Reloading model with GPU support...")
+                self.unload_model()
+            elif n_gpu_layers == 0 and self.using_gpu:
+                # Need to reload in CPU mode
+                logger.info("Reloading model in CPU-only mode...")
+                self.unload_model()
+            else:
+                # No need to reload
+                return
+            
+        # Check if model file exists
+        if not os.path.exists(self.model_path):
             logger.error(f"Model file not found: {self.model_path}")
             raise FileNotFoundError(f"Model file not found: {self.model_path}")
         
         try:
             logger.info(f"Loading Gemma model from {self.model_path}...")
+            logger.info(f"Using GPU layers: {n_gpu_layers}")
+            
+            # Log current system memory state
+            memory = psutil.virtual_memory()
+            logger.info(f"System memory: {memory.percent}% used, {memory.available / (1024**3):.2f}GB available")
             
             # Create Llama model with streaming capability
-            self.model = Llama(
-                model_path=str(self.model_path),
-                n_ctx=context_size,
-                n_gpu_layers=n_gpu_layers,
-                verbose=False
-            )
-            
-            # Create tokenizer adapter
-            self.tokenizer = LlamaCppTokenizerAdapter(self.model)
-            
-            self.initialized = True
-            logger.info("Gemma model loaded successfully")
+            try:
+                # Suppress stderr output during model initialization
+                with suppress_stdout_stderr():
+                    self.model = Llama(
+                        model_path=str(self.model_path),
+                        n_ctx=context_size,
+                        n_gpu_layers=n_gpu_layers,
+                        verbose=False
+                    )
+                self.using_gpu = n_gpu_layers > 0
+                
+                # Create tokenizer adapter
+                self.tokenizer = LlamaCppTokenizerAdapter(self.model)
+                
+                self.initialized = True
+                logger.info(f"Gemma model loaded successfully with n_gpu_layers={n_gpu_layers}")
+            except Exception as load_error:
+                logger.error(f"Error during model loading: {str(load_error)}")
+                
+                # If we failed with GPU, try CPU mode
+                if n_gpu_layers > 0:
+                    logger.info("Attempting fallback to CPU-only mode...")
+                    try:
+                        # Suppress stderr output during model initialization
+                        with suppress_stdout_stderr():
+                            self.model = Llama(
+                                model_path=str(self.model_path),
+                                n_ctx=context_size,
+                                n_gpu_layers=0,
+                                verbose=False
+                            )
+                        self.using_gpu = False
+                        
+                        # Create tokenizer adapter
+                        self.tokenizer = LlamaCppTokenizerAdapter(self.model)
+                        
+                        self.initialized = True
+                        logger.info("Gemma model loaded successfully in CPU-only mode")
+                    except Exception as cpu_error:
+                        logger.error(f"CPU fallback also failed: {str(cpu_error)}")
+                        raise
+                else:
+                    raise
+                
         except Exception as e:
             logger.error(f"Failed to load Gemma model: {str(e)}")
             raise
+    
+    def unload_model(self):
+        """Unload the model to free memory"""
+        if self.initialized:
+            logger.info("Unloading Gemma model to free memory...")
+            self.model = None
+            self.tokenizer = None
+            self.initialized = False
+            
+            # Force garbage collection
+            import gc
+            gc.collect()
+            logger.info("Gemma model unloaded")
+    
+    def __del__(self):
+        """Cleanup when object is destroyed"""
+        self.unload_model()
     
     def generate_translation_prompt(self, text: str, src_lang: str, tgt_lang: str) -> str:
         """
@@ -207,10 +349,6 @@ class GemmaTranslator:
         Returns:
             Translated text
         """
-        if not self.initialized:
-            self.load_model()
-        
-        # Check if text is too large and needs chunking
         if self.is_text_too_large(text):
             logger.info("Text is too large, using chunking")
             return self._translate_large_text(text, src_lang, tgt_lang, temperature, top_p, max_tokens)
@@ -355,10 +493,6 @@ class GemmaTranslator:
         Yields:
             Chunks of translated text as they're generated
         """
-        if not self.initialized:
-            self.load_model()
-        
-        # Check if text is too large and needs chunking
         if self.is_text_too_large(text):
             logger.info("Text is too large, using chunked streaming")
             yield from self._translate_large_text_streaming(text, src_lang, tgt_lang, temperature, top_p, max_tokens)

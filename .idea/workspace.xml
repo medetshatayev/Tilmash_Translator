@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="Added output streaming from the Tilmash model">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/gemma_translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/gemma_translation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/tilmash_translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/tilmash_translation.py" afterDir="false" />
-    </list>
+    <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="Added output streaming from the Tilmash model" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -96,6 +91,7 @@
       <workItem from="1744214576202" duration="87000" />
       <workItem from="1744222457585" duration="285000" />
       <workItem from="1744224200182" duration="186000" />
+      <workItem from="1744225024197" duration="65000" />
     </task>
     <task id="LOCAL-00001" summary="Added download option of model from HF">
       <option name="closed" value="true" />
@@ -145,7 +141,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744214645974</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Added output streaming from the Tilmash model">
+      <option name="closed" value="true" />
+      <created>1744225048181</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1744225048181</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

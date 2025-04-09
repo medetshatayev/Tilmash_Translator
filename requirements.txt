@@ -6,6 +6,7 @@ pysbd
 torch
 huggingface_hub
 python-dotenv
+psutil
 
 # NLTK for readability and tokenization
 nltk
