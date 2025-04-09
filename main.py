@@ -1,12 +1,12 @@
 # main.py
 
+import os
 import streamlit as st
 import logging
 
 st.set_page_config(page_title="Translator & Readability", layout="wide")
 logging.basicConfig(level=logging.INFO)
 
-import os
 import tempfile
 import io
 from docx import Document
@@ -67,7 +67,7 @@ def handle_translation():
         tgt_lang = st.selectbox("Перевод на:", tgt_options)
         
         # Select translation model
-        model_option = st.radio("Выберите модель перевода:", ["Tilmash", "Gemma 3"])
+        model_option = st.radio("Выберите модель перевода:", ["Gemma 3", "Tilmash"])
 
         if st.button("Перевести"):
             if model_option == "Tilmash":
@@ -93,10 +93,18 @@ def handle_translation():
                     st.warning("Не удалось выполнить перевод.")
             else:  # Gemma 3
                 st.subheader("Результат перевода (Gemma 3):")
-                # Create container for streaming output
-                with st.spinner("Загружается модель Gemma 3..."):
+                # Create a translator instance to check if text needs chunking
+                from utils.gemma_translation import GemmaTranslator
+                translator = GemmaTranslator()
+                if not translator.initialized:
+                    translator.load_model()
+                needs_chunking = translator.is_text_too_large(input_text)
+                
+                # Display appropriate spinner message based on whether chunking is needed
+                spinner_message = "Processing text in chunks..." if needs_chunking else "Processing translation..."
+                with st.spinner(spinner_message):
                     # Display streaming translation results
-                    result = display_streaming_translation(input_text, src_lang, tgt_lang)
+                    result, _ = display_streaming_translation(input_text, src_lang, tgt_lang)
                     
                     if result:
                         # Prepare download capability

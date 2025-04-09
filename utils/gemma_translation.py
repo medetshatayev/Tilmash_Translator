@@ -6,11 +6,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 from llama_cpp import Llama
 import streamlit as st
-from typing import Iterator, Optional, List, Tuple
+from typing import Iterator, Optional, List
 import re
 
 from .chunking import chunk_text_with_separators
-#from .text_processing import detect_language
 
 # Load environment variables
 load_dotenv()
@@ -162,7 +161,7 @@ class GemmaTranslator:
             token_count = len(text) / 4
         
         # Allow for prompt overhead and model's response tokens
-        threshold = DEFAULT_CONTEXT_SIZE * 0.7
+        threshold = DEFAULT_CONTEXT_SIZE * 0.9
         
         return token_count > threshold
     
@@ -427,8 +426,6 @@ class GemmaTranslator:
                 sentences = self._split_text_into_sentences(text, src_lang)
                 chunks_with_seps = [(sent, " ") for sent in sentences]
             
-            yield "Processing text in chunks... "
-            
             for chunk_idx, (chunk, separator) in enumerate(chunks_with_seps):
                 if not chunk.strip():
                     yield separator
@@ -497,7 +494,7 @@ def gemma_translate(text: str, src_lang: str, tgt_lang: str, streaming: bool = T
         return "" if not streaming else iter([f"Error: {str(e)}"])
 
 
-def display_streaming_translation(text: str, src_lang: str, tgt_lang: str) -> None:
+def display_streaming_translation(text: str, src_lang: str, tgt_lang: str) -> tuple:
     """
     Display streaming translation in a Streamlit app.
     
@@ -505,9 +502,18 @@ def display_streaming_translation(text: str, src_lang: str, tgt_lang: str) -> No
         text: Text to translate
         src_lang: Source language code ('en', 'ru', 'kk')
         tgt_lang: Target language code ('en', 'ru', 'kk')
+        
+    Returns:
+        tuple: (translated_text, needs_chunking)
     """
     if not text:
-        return
+        return "", False
+    
+    # Check if text needs chunking
+    translator = GemmaTranslator()
+    if not translator.initialized:
+        translator.load_model()
+    needs_chunking = translator.is_text_too_large(text)
     
     # Create placeholder for streaming output
     placeholder = st.empty()
@@ -518,4 +524,4 @@ def display_streaming_translation(text: str, src_lang: str, tgt_lang: str) -> No
         result += token
         placeholder.markdown(result)
     
-    return result 
+    return result, needs_chunking 
