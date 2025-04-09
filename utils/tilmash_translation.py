@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, TranslationPipeline
 from .chunking import chunk_text_with_separators
 from huggingface_hub import login
+from typing import Iterator
 
 # Load environment variables from .env file
 load_dotenv()
@@ -106,6 +107,164 @@ def tilmash_translate(input_text, src_lang, tgt_lang, model=None, tokenizer=None
             translated_sentences.append(translated_sentence)
 
     return ' '.join(translated_sentences)
+
+
+def tilmash_translate_streaming(input_text, src_lang, tgt_lang, model=None, tokenizer=None, max_length=512) -> Iterator[str]:
+    """Streaming version of the translation function that yields translated sentences one by one"""
+    
+    lang_map = {
+        'ru': 'rus_Cyrl',
+        'en': 'eng_Latn',
+        'kk': 'kaz_Cyrl'
+    }
+
+    # Validate language pair
+    if src_lang not in lang_map or tgt_lang not in lang_map:
+        logging.error(f"Unsupported language pair: {src_lang} -> {tgt_lang}")
+        yield ""
+        return
+
+    # Initialize model and tokenizer with error handling
+    if model is None or tokenizer is None:
+        model_name = "issai/tilmash"
+        cache_dir = "local_llms"
+        
+        # Ensure cache directory exists
+        os.makedirs(cache_dir, exist_ok=True)
+        
+        try:
+            # First try to load the model locally
+            logging.info("Trying to load Tilmash model from local cache...")
+            try:
+                tokenizer = AutoTokenizer.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    local_files_only=True
+                )
+                model = AutoModelForSeq2SeqLM.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    local_files_only=True
+                )
+                logging.info("Successfully loaded model from local cache.")
+            except OSError:
+                # If local loading fails, download the model
+                logging.info("Model not found locally. Downloading from Hugging Face...")
+                tokenizer = AutoTokenizer.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    local_files_only=False
+                )
+                model = AutoModelForSeq2SeqLM.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    local_files_only=False
+                )
+                logging.info("Successfully downloaded and loaded the model.")
+        except ValueError as e:
+            logging.error(f"Invalid model configuration: {str(e)}")
+            yield f"Error: {str(e)}"
+            return
+        except Exception as e:
+            logging.error(f"Unexpected error during model initialization: {str(e)}")
+            yield f"Error: {str(e)}"
+            return
+
+    # Configure translation pipeline with optimized parameters
+    pipeline_tilmash = TranslationPipeline(
+        model=model,
+        tokenizer=tokenizer,
+        src_lang=lang_map[src_lang],
+        tgt_lang=lang_map[tgt_lang],
+        max_length=max_length,
+        num_beams=7,
+        early_stopping=True,
+        repetition_penalty=1.3,
+        no_repeat_ngram_size=2,
+        length_penalty=1.1,
+        truncation=True,
+        clean_up_tokenization_spaces=True
+    )
+
+    # Check if text is too large for single processing
+    # Improved text size detection - check by paragraphs
+    paragraphs = re.split(r'\n\s*\n', input_text)
+    is_large_text = len(paragraphs) > 3 or len(input_text) > 1000  # Multiple paragraphs or long text
+    
+    if is_large_text:
+        # Process paragraph by paragraph for structured documents
+        for i, paragraph in enumerate(paragraphs):
+            if not paragraph.strip():
+                yield "\n\n"
+                continue
+                
+            # If paragraph itself is too large, process it sentence by sentence
+            if len(paragraph) > 800:
+                sentences = re.split(r'(?<=[.!?])\s+', paragraph)
+                for sentence in sentences:
+                    if not sentence.strip():
+                        continue
+                        
+                    try:
+                        result = pipeline_tilmash(sentence)
+                        translated = _extract_translation(result)
+                        yield translated + " "
+                    except Exception as e:
+                        logging.error(f"Error translating sentence: {str(e)}")
+                        yield f"[Error: {str(e)}] "
+            else:
+                # Process whole paragraph at once
+                try:
+                    result = pipeline_tilmash(paragraph)
+                    translated = _extract_translation(result)
+                    yield translated
+                    # Add paragraph break after each paragraph
+                    if i < len(paragraphs) - 1:
+                        yield "\n\n"
+                except Exception as e:
+                    logging.error(f"Error translating paragraph: {str(e)}")
+                    yield f"[Error translating paragraph: {str(e)}]\n\n"
+    else:
+        # For short texts, process the entire text at once
+        try:
+            result = pipeline_tilmash(input_text)
+            translated = _extract_translation(result)
+            yield translated
+        except Exception as e:
+            logging.error(f"Error translating text: {str(e)}")
+            yield f"[Error: {str(e)}]"
+
+
+def display_tilmash_streaming_translation(text: str, src_lang: str, tgt_lang: str) -> tuple:
+    """
+    Display streaming translation in a Streamlit app.
+    
+    Args:
+        text: Text to translate
+        src_lang: Source language code ('en', 'ru', 'kk')
+        tgt_lang: Target language code ('en', 'ru', 'kk')
+        
+    Returns:
+        tuple: (translated_text, needs_chunking)
+    """
+    import streamlit as st
+    
+    if not text:
+        return "", False
+    
+    # Check if text needs chunking
+    needs_chunking = len(text) > 1000  # Roughly 250 tokens
+    
+    # Create placeholder for streaming output
+    placeholder = st.empty()
+    result = ""
+    
+    # Stream translation
+    for sentence in tilmash_translate_streaming(text, src_lang, tgt_lang):
+        result += sentence
+        placeholder.markdown(result)
+    
+    return result, needs_chunking
 
 
 def _extract_translation(result):

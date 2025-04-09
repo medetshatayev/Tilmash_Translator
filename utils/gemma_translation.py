@@ -19,9 +19,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Model configuration
-MODEL_PATH = os.path.join("local_llms", "gemma-3-27b-it-Q4_K_M.gguf")
+MODEL_PATH = os.path.join("local_llms", "gemma-3-12b-it-Q4_K_M.gguf")
 DEFAULT_CONTEXT_SIZE = 8192
-DEFAULT_GPU_LAYERS = 62  # Adjust based on available GPU memory
+DEFAULT_GPU_LAYERS = 48  # Adjust based on available GPU memory
 DEFAULT_MAX_TOKENS = 4096
 DEFAULT_CHUNK_SIZE = 3000  # Maximum number of tokens per chunk for safety
 

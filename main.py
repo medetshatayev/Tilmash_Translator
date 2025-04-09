@@ -21,7 +21,7 @@ from utils.readability_indices import (
     smog_index
 )
 from utils.formatting import color_code_index
-from utils.tilmash_translation import tilmash_translate
+from utils.tilmash_translation import tilmash_translate, display_tilmash_streaming_translation
 from utils.gemma_translation import gemma_translate, display_streaming_translation
 
 def handle_translation():
@@ -71,12 +71,19 @@ def handle_translation():
 
         if st.button("Перевести"):
             if model_option == "Tilmash":
-                with st.spinner("Выполняется перевод с Tilmash..."):
-                    translated_text = tilmash_translate(input_text, src_lang, tgt_lang)
+                st.subheader("Результат перевода:")
+                # Get the approximate size of the text to determine if chunking is needed
+                approx_text_size = len(input_text) / 4  # rough approximation (4 chars ≈ 1 token)
+                needs_chunking = approx_text_size > 500  # If text is likely over 500 tokens
+                
+                # Display appropriate spinner message
+                spinner_message = "Processing text in chunks..." if needs_chunking else "Processing translation..."
+                with st.spinner(spinner_message):
+                    # Use the new streaming translation function
+                    translated_text, _ = display_tilmash_streaming_translation(input_text, src_lang, tgt_lang)
+                
                 if translated_text:
-                    st.subheader("Результат перевода:")
-                    st.write(translated_text)
-
+                    # Prepare download capability
                     doc = Document()
                     doc.add_paragraph(translated_text)
                     doc_io = io.BytesIO()
