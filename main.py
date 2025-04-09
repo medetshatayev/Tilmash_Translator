@@ -22,6 +22,7 @@ from utils.readability_indices import (
 )
 from utils.formatting import color_code_index
 from utils.tilmash_translation import tilmash_translate
+from utils.gemma_translation import gemma_translate, display_streaming_translation
 
 def handle_translation():
     st.header("Перевод (Kazakh, Russian, English)")
@@ -64,28 +65,55 @@ def handle_translation():
             tgt_options = ["ru","en"]
 
         tgt_lang = st.selectbox("Перевод на:", tgt_options)
+        
+        # Select translation model
+        model_option = st.radio("Выберите модель перевода:", ["Tilmash", "Gemma 3"])
 
         if st.button("Перевести"):
-            with st.spinner("Выполняется перевод..."):
-                translated_text = tilmash_translate(input_text, src_lang, tgt_lang)
-            if translated_text:
-                st.subheader("Результат перевода:")
-                st.write(translated_text)
+            if model_option == "Tilmash":
+                with st.spinner("Выполняется перевод с Tilmash..."):
+                    translated_text = tilmash_translate(input_text, src_lang, tgt_lang)
+                if translated_text:
+                    st.subheader("Результат перевода:")
+                    st.write(translated_text)
 
-                doc = Document()
-                doc.add_paragraph(translated_text)
-                doc_io = io.BytesIO()
-                doc.save(doc_io)
-                doc_io.seek(0)
+                    doc = Document()
+                    doc.add_paragraph(translated_text)
+                    doc_io = io.BytesIO()
+                    doc.save(doc_io)
+                    doc_io.seek(0)
 
-                st.download_button(
-                    label="Скачать переведённый текст (.docx)",
-                    data=doc_io,
-                    file_name="translated_text.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
-            else:
-                st.warning("Не удалось выполнить перевод.")
+                    st.download_button(
+                        label="Скачать переведённый текст (.docx)",
+                        data=doc_io,
+                        file_name="translated_text.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                else:
+                    st.warning("Не удалось выполнить перевод.")
+            else:  # Gemma 3
+                st.subheader("Результат перевода (Gemma 3):")
+                # Create container for streaming output
+                with st.spinner("Загружается модель Gemma 3..."):
+                    # Display streaming translation results
+                    result = display_streaming_translation(input_text, src_lang, tgt_lang)
+                    
+                    if result:
+                        # Prepare download capability
+                        doc = Document()
+                        doc.add_paragraph(result)
+                        doc_io = io.BytesIO()
+                        doc.save(doc_io)
+                        doc_io.seek(0)
+
+                        st.download_button(
+                            label="Скачать переведённый текст (.docx)",
+                            data=doc_io,
+                            file_name="gemma_translated_text.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        )
+                    else:
+                        st.warning("Не удалось выполнить перевод с Gemma 3.")
 
 def handle_readability_analysis():
     st.header("Анализ удобочитаемости текста")
@@ -142,7 +170,7 @@ def handle_readability_analysis():
 def main():
     setup_nltk()
 
-    st.title("Tilmash Translator & Readability Analysis")
+    st.title("Translation & Readability Analysis")
     st.sidebar.header("Функциональность")
     functionality = st.sidebar.radio("Выберите режим:", ["Перевод", "Анализ удобочитаемости"])
 

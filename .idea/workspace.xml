@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="Updated retrival of env variables">
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,6 +83,11 @@
       <workItem from="1741781922362" duration="49000" />
       <workItem from="1741810637677" duration="584000" />
       <workItem from="1741812691451" duration="286000" />
+      <workItem from="1741813026720" duration="200000" />
+      <workItem from="1741813292902" duration="120000" />
+      <workItem from="1741964290999" duration="9000" />
+      <workItem from="1744194277665" duration="625000" />
+      <workItem from="1744198147741" duration="5000" />
     </task>
     <task id="LOCAL-00001" summary="Added download option of model from HF">
       <option name="closed" value="true" />
@@ -108,7 +113,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741812765972</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Updated retrival of env variables">
+      <option name="closed" value="true" />
+      <created>1741813134460</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1741813134460</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

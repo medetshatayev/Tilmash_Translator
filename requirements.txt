@@ -14,3 +14,6 @@ pyphen
 # For reading docs
 python-docx
 PyPDF2
+
+# For Gemma 3 model (GGUF format)
+llama-cpp-python
