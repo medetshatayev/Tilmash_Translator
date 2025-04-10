@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="Added output streaming from the Tilmash model" />
+    <list default="true" id="3b0843d2-8437-44d5-aef5-876bb2ff9c3c" name="Changes" comment="Create each instance of gemma model for each session">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/start.sh" beforeDir="false" afterPath="$PROJECT_DIR$/start.sh" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -92,6 +95,10 @@
       <workItem from="1744222457585" duration="285000" />
       <workItem from="1744224200182" duration="186000" />
       <workItem from="1744225024197" duration="65000" />
+      <workItem from="1744234975823" duration="462000" />
+      <workItem from="1744235579674" duration="573000" />
+      <workItem from="1744236192793" duration="40000" />
+      <workItem from="1744236610365" duration="25000" />
     </task>
     <task id="LOCAL-00001" summary="Added download option of model from HF">
       <option name="closed" value="true" />
@@ -149,7 +156,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744225048181</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Create each instance of gemma model for each session">
+      <option name="closed" value="true" />
+      <created>1744235346330</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1744235346330</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -172,6 +187,7 @@
     <MESSAGE value="Added gemma 3 model" />
     <MESSAGE value="Bugfixes" />
     <MESSAGE value="Added output streaming from the Tilmash model" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added output streaming from the Tilmash model" />
+    <MESSAGE value="Create each instance of gemma model for each session" />
+    <option name="LAST_COMMIT_MESSAGE" value="Create each instance of gemma model for each session" />
   </component>
 </project>

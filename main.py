@@ -57,7 +57,8 @@ from utils.readability_indices import (
     flesch_reading_ease,
     flesch_kincaid_grade_level,
     gunning_fog_index,
-    smog_index
+    smog_index,
+    highlight_complex_text
 )
 from utils.formatting import color_code_index
 from utils.tilmash_translation import tilmash_translate, display_tilmash_streaming_translation
@@ -327,6 +328,7 @@ def handle_readability_analysis():
                         fkgl = flesch_kincaid_grade_level(text, lang_code)
                         fog = gunning_fog_index(text, lang_code)
                         smog = smog_index(text, lang_code)
+                        highlighted_text, complex_words_list = highlight_complex_text(text, lang_code)
 
                     st.subheader("Результаты удобочитаемости")
                     st.markdown(
@@ -345,6 +347,9 @@ def handle_readability_analysis():
                         f"**Индекс SMOG:** {color_code_index('SMOG Index', smog)}",
                         unsafe_allow_html=True
                     )
+                    
+                    st.subheader("Сложные слова")
+                    st.write(", ".join(set(complex_words_list)))
                 finally:
                     # Release the semaphore
                     model_semaphore.release()
