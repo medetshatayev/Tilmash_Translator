@@ -83,9 +83,3 @@ Override any of these via the environment or edit **config.py**.
 ## License
 
 Distributed under the MIT License — see `LICENSE` for details.
-
-## Acknowledgements
-
-- ISSAI team for releasing **Tilmash**  
-- Meta for open‑sourcing *Gemma‑3*  
-- Streamlit, Hugging Face and the Python OSS community
